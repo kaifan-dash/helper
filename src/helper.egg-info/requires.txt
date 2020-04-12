@@ -1,3 +1,7 @@
 pandas
 boto3
 numpy
+geopandas
+sklearn
+matplotlib
+shapely
