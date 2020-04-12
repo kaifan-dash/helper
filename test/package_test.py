@@ -1,4 +1,4 @@
-import data_helper
+from helper.DataHelper import DataHelper as DataHelper
 
 helper = DataHelper()
 bucket = 'dashmote-product-daily'
