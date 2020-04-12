@@ -8,7 +8,7 @@ setup(
     description = 'Simplifies data handling proceedures', 
     version = '0.0.1', 
     package_dir = {'': 'src'}, 
-    packages = ['data_helper'], 
+    packages = ['helper'], 
     author = 'Kai', 
     author_email = 'kaifan@dashmote.com', 
     include_package_data = True, 
