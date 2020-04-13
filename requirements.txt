@@ -5,3 +5,4 @@ geopandas
 sklearn
 matplotlib
 shapely
+descartes
