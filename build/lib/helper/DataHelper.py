@@ -13,13 +13,6 @@ def get_dates():
 class DataHelper():
     def __init__(self, manager=''):
         self.manager = manager
-        try:
-            with open('/home/ubuntu/notebook/.secret','r') as f:
-                account=f.readlines()
-            os.environ['AWS_ACCESS_KEY_ID']=account[0].strip()
-            os.environ['AWS_SECRET_ACCESS_KEY']=account[1].strip()
-        except:
-            print ('could not locate notebook AWS credentials')
 
     def read_parquet(self, bucket, platform, date, country, option):
         if option == 'outlet' or option == 'information':
@@ -47,7 +40,7 @@ class DataHelper():
         meal_df = meal_df[meal_df['id_source'] == id_source]
         return meal_df[meal_df['name'].str.contains(meal_name)]
 
-    def concat_daily(self, file_list, bucket='dashmote-product-daily', dup_filter = ['id_source']):
+    def concat_by_list(self, file_list, bucket='dashmote-product-daily', dup_filter = ['id_source']):
         df = pd.DataFrame()
         for key in file_list:
             print (key)
