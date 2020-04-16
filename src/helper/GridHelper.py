@@ -22,7 +22,7 @@ class GridHelper():
         df['lat'] = df['lat'].astype(float)
         df['lon'] = df['lon'].astype(float)
 
-        coords = df.as_matrix(columns = ['lat', 'lon'])
+        coords = df.to_numpy(columns = ['lat', 'lon'])
         kms_per_radian = 6371.0088
         epsilon = epsilon / kms_per_radian
         db = DBSCAN(

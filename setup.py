@@ -7,7 +7,7 @@ setup(
     name = 'helper', 
     description = 'Simplifies data handling proceedures', 
     version = '0.0.1', 
-    package_dir = {'': 'src'}, 
+    package_dir = {'': 'src/helper'}, 
     packages = ['helper'], 
     author = 'Kai', 
     author_email = 'kaifan@dashmote.com', 
