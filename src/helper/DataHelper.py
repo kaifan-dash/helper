@@ -65,7 +65,3 @@ class DataHelper():
             files = self.manager.get_files(bucket, f'{platform}/{_date}/{country}_outlet_{option}')
             results.extend(files)
         return results
-
-    def get_files(self, bucket, prefix):
-
-
