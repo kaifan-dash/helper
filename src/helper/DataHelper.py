@@ -1,5 +1,6 @@
 import pandas as pd 
 from datetime import date, timedelta, datetime
+import os
 
 def get_dates():
     dates = []
@@ -12,6 +13,13 @@ def get_dates():
 class DataHelper():
     def __init__(self, manager=''):
         self.manager = manager
+        try:
+            with open('/home/ubuntu/notebook/.secret','r') as f:
+                account=f.readlines()
+            os.environ['AWS_ACCESS_KEY_ID']=account[0].strip()
+            os.environ['AWS_SECRET_ACCESS_KEY']=account[1].strip()
+        except:
+            print ('could not locate notebook AWS credentials')
 
     def read_parquet(self, bucket, platform, date, country, option):
         if option == 'outlet' or option == 'information':
@@ -49,11 +57,15 @@ class DataHelper():
         df = df.drop_duplicates(dup_filter).reset_index()
         return df
 
-    def get_files(self, bucket, platform, date, country, option):
+    def get_files_by_dates(self, bucket, platform, country, option):
+        if self.manager == '':
+            return 's3 manager not setup correctly'
         results = []
         for _date in get_dates():
             files = self.manager.get_files(bucket, f'{platform}/{_date}/{country}_outlet_{option}')
             results.extend(files)
         return results
+
+    def get_files(self, bucket, prefix):
 
 
