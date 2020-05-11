@@ -44,7 +44,7 @@ class DataHelper():
         df = pd.DataFrame()
         for key in file_list:
             print (key)
-            _file = pd.read_parquet(f's3://{bucket}/{key}')
+            _file = pd.read_parquet(f's3://{bucket}/{key}', engine='fastparquet')
             df = pd.concat([_file, df], sort=False)
             del(_file)
         df = df.drop_duplicates(dup_filter).reset_index()

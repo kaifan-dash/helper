@@ -50,3 +50,48 @@ class GridHelper():
         gdf = gpd.GeoDataFrame(tmp, geometry=gpd.points_from_xy(tmp.lon, tmp.lat))
         ax = world.plot(color='white', edgecolor='black',figsize=(24, 24))
         gdf.plot(ax=ax, color='red',figsize=(24, 24))
+
+    def gen_grid(self, country, gap=3, output='dict'):
+        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+        polies = world[world['name'].str.contains(country)]['geometry'].to_list()[0]
+
+        min_lat = polies.bounds[1]
+        min_lon = polies.bounds[0]
+        max_lat = polies.bounds[3]
+        max_lon = polies.bounds[2]
+
+        lon_span = int(geopy.distance.vincenty((min_lat, min_lon), (min_lat, max_lon)).km)
+        lat_span = int(geopy.distance.vincenty((min_lat, min_lon), (max_lat, min_lon)).km)
+
+        lat_diff = (max_lat - min_lat)
+        lon_diff = (max_lon - min_lon)
+        lat_inc = lat_diff / lat_span * gap
+        lon_inc = lon_diff / lon_span * gap
+
+        # gen grids within rectangular area
+        results = []
+        for lat_index in range(int(lat_span/gap)):
+            lat = min_lat + (lat_index * lat_inc)
+            for lon_index in range(int(lon_span/gap)):
+                lon = min_lon + (lon_index * lon_inc)
+                _point = {'lat': lat, 'lon': lon}
+                results.append(_point)
+
+        # filter grids in actual country boundary
+        points = []
+        for point in results:
+            _point = Point(point['lon'], point['lat'])
+            if polies.contains(_point):
+                points.append(point)
+
+        results = {}
+        results['dict'] = points
+
+        js = {'data': points}
+        results['json'] = js
+
+        df = pd.DataFrame(points)
+        results['df'] = results['dataframe'] = df
+
+        return results[output]
+
