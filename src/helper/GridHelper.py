@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 from geopy.distance import great_circle, VincentyDistance
 from shapely.geometry import MultiPoint, Point
+import plotly.express as px
+import pygeohash as gh
+
 
 def get_centermost_point(cluster):
     centroid = (MultiPoint(cluster).centroid.x, MultiPoint(cluster).centroid.y)
@@ -43,17 +46,13 @@ class GridHelper():
         rep_points = pd.DataFrame({'lon':lons, 'lat':lats})
         return rep_points
 
-    def map_grid(self, df):
-        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-        world['name'].unique()
-        tmp = pd.DataFrame.from_dict(df)
-        gdf = gpd.GeoDataFrame(tmp, geometry=gpd.points_from_xy(tmp.lon, tmp.lat))
-        ax = world.plot(color='white', edgecolor='black',figsize=(24, 24))
-        gdf.plot(ax=ax, color='red',figsize=(24, 24))
-
     def gen_grid(self, country, gap=3, output='dict'):
         world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-        polies = world[world['name'].str.contains(country)]['geometry'].to_list()[0]
+        try:
+            polies = world[world['name'].str.contains(country)]['geometry'].to_list()[0]
+        except Exception as e:
+            print (f'A problem occurred while finding {country} in world')
+            print (e)
 
         min_lat = polies.bounds[1]
         min_lon = polies.bounds[0]
@@ -63,10 +62,12 @@ class GridHelper():
         lon_span = int(geopy.distance.vincenty((min_lat, min_lon), (min_lat, max_lon)).km)
         lat_span = int(geopy.distance.vincenty((min_lat, min_lon), (max_lat, min_lon)).km)
 
+        # This method gives grid where points are {inc}km away from each other
+        inc = gap * math.sqrt(2)
         lat_diff = (max_lat - min_lat)
         lon_diff = (max_lon - min_lon)
-        lat_inc = lat_diff / lat_span * gap
-        lon_inc = lon_diff / lon_span * gap
+        lat_inc = lat_diff / lat_span * inc
+        lon_inc = lon_diff / lon_span * inc
 
         # gen grids within rectangular area
         results = []
@@ -94,4 +95,19 @@ class GridHelper():
         results['df'] = results['dataframe'] = df
 
         return results[output]
+
+    def geohash_grid(self, general_grid, data):
+        general_grid['geohash'] = general_grid.apply(lambda x: gh.encode(x.lat, x.lon, precision=6), axis=1)
+        data['geohash'] = data.apply(lambda x: gh.encode(x.lat, x.lon, precision=6), axis=1)
+        result = general_grid[general_grid['geohash'].isin(data['geohash'])]
+        return result
+
+    def map_grid(self, df, zoom=3):
+        if not isinstance(df, pd.DataFrame):
+            print ('Input is not a pandas dataframe')
+            return
+        fig = px.scatter_mapbox(df, lat="lat", lon="lon", zoom = zoom, height=300)
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        fig.show()
 
